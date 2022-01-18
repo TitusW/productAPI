@@ -22,10 +22,11 @@ func Authentication(next http.Handler) http.Handler {
 			json.NewEncoder(w).Encode("Failed to validate")
 			return
 		}
-		w.Header().Set("email", claims.Email)
-		w.Header().Set("first_name", claims.First_name)
-		w.Header().Set("last_name", claims.Last_name)
-		w.Header().Set("uid", claims.Uid)
+		w.Header().Add("Email", claims.Email)
+		w.Header().Add("First_name", claims.First_name)
+		w.Header().Add("Last_name", claims.Last_name)
+		w.Header().Add("user_type", "ADMIN")
+		w.Header().Add("Uid", claims.Uid)
 		next.ServeHTTP(w, r)
 	})
 }

@@ -25,6 +25,11 @@ var (
 
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if err := helpers.CheckUserType(w, r, "ADMIN"); err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	urlParams := r.URL.Query()
 
@@ -79,6 +84,12 @@ func GetUserById(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	var User models.User
 	id := mux.Vars(r)["id"]
+
+	if err := helpers.MatchUserTypeToUid(w, r, id); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
 
 	if err := userCollection.FindOne(ctx, bson.M{"user_id": id}).Decode(&User); err != nil {
 		defer cancel()
